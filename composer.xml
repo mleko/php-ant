@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="composer" basedir="." default="run" xmlns:mleko.composer="composer.ant.mleko">
+	<property name="properties.composer" value="${basedir}/composer.ant.properties"/>
+
+	<!-- Load properties from file -->
+	<condition property="composer.properties.available" value="true">
+		<available file="${properties.composer}"/>
+	</condition>
+	<target name="load-properties" if="composer.properties.available">
+		<echo>Load properties from file ${properties.composer}</echo>
+		<property file="${properties.composer}" relative="true"/>
+	</target>
+
+	<!-- Init default properties -->
+	<target name="init" depends="load-properties" description="Init default properties values">
+		<property name="config.composer.self-update" value="true"/>
+
+		<property name="config.composer.project.dir" value="${basedir}" relative="true"/>
+
+		<property name="config.composer.phar" location="${basedir}/build/tools/composer.phar" relative="true"/>
+	</target>
+
+	<!-- Dump config to log and file -->
+	<target name="dump-properties" depends="init">
+		<echo>Dump composer properties to file ${properties.composer}</echo>
+
+		<local name="composer.properties.dir"/>
+		<dirname property="composer.properties.dir" file="${properties.composer}"/>
+		<mkdir dir="${composer.properties.dir}"/>
+
+		<echoproperties prefix="config.composer."/>
+		<echoproperties destfile="${properties.composer}" prefix="config.composer."/>
+	</target>
+
+	<!-- Check if composer already exists -->
+	<target name="exists" description="Check that composer exists" depends="init">
+		<available property="composer.exists" file="${config.composer.phar}"/>
+	</target>
+
+	<!-- Self-update composer -->
+	<target name="self-update" if="${config.composer.self-update}" description="Self-update Composer" depends="init">
+		<mleko.composer:command>self-update</mleko.composer:command>
+	</target>
+
+	<!-- Create dir and install composer -->
+	<target name="self-install" unless="composer.exists" depends='init, exists' description="Fetch Composer if it doesn't exist">
+		<echo message="Installing composer" level="verbose"/>
+
+		<local name="composer.phar.dir"/>
+		<dirname property="composer.phar.dir" file="${config.composer.phar}"/>
+		<mkdir dir="${composer.phar.dir}"/>
+
+		<get src="https://getcomposer.org/config.composer.phar" dest="${config.composer.phar}" skipexisting="true"/>
+		<chmod file="${config.composer.phar}" perm="0755"/>
+		<echo message="composer installed" level="verbose"/>
+	</target>
+
+	<!-- Install dependencies -->
+	<target name="run" depends="init, self-install, self-update">
+		<!-- Check for composer.lock file. If exists run update, install in other case -->
+		<local name="composer.command"/>
+		<condition property="composer.command" value="update" else="install">
+			<available file="${config.composer.project.dir}/composer.lock"/>
+		</condition>
+		<mleko.composer:command options="--optimize-autoloader">${composer.command}</mleko.composer:command>
+	</target>
+
+	<!-- Macro simplifying use of composer -->
+	<macrodef name="command" uri="composer.ant.mleko">
+		<text name="command"/>
+		<attribute name="options" default=""/>
+		<sequential>
+			<local name="opts"/>
+			<property name="opts" value="--no-interaction @{options}"/>
+			<echo message="Run composer @{command}" level="verbose"/>
+			<exec executable="${config.composer.phar}">
+				<arg line="${opts}"/>
+				<arg value="@{command}"/>
+			</exec>
+			<echo message="composer @{command} ended" level="verbose"/>
+		</sequential>
+	</macrodef>
+
+</project>
