@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="composer" basedir="." default="run" xmlns:mleko.composer="composer.ant.mleko">
+<project name="composer" basedir="." default="update" xmlns:mleko.composer="composer.ant.mleko">
 	<property name="properties.composer" value="${basedir}/composer.ant.properties"/>
 
 	<!-- Load properties from file -->
@@ -62,7 +62,7 @@
 	</target>
 
 	<!-- Install dependencies -->
-	<target name="run" depends="init, self-install, self-update" description="Install/update project dependencies">
+	<target name="update" depends="init, self-install, self-update" description="Install/update project dependencies">
 		<!-- Check for composer.lock file. If exists run update, install in other case -->
 		<local name="composer.command"/>
 		<condition property="composer.command" value="update" else="install">
