@@ -12,8 +12,9 @@
 	</target>
 
 	<!-- Init default properties -->
-	<target name="init" depends="load-properties" description="Init default properties values">
+	<target name="init" depends="load-properties">
 		<property name="config.composer.self-update" value="true"/>
+		<property name="config.composer.self-update.age" value="604800"/>
 
 		<property name="config.composer.project.dir" value="${basedir}" relative="true"/>
 
@@ -21,7 +22,7 @@
 	</target>
 
 	<!-- Dump config to log and file -->
-	<target name="dump-properties" depends="init">
+	<target name="dump-properties" depends="init" description="Init properties and dump them to file">
 		<echo>Dump composer properties to file ${properties.composer}</echo>
 
 		<local name="composer.properties.dir"/>
@@ -33,12 +34,17 @@
 	</target>
 
 	<!-- Check if composer already exists -->
-	<target name="exists" description="Check that composer exists" depends="init">
+	<target name="exists" depends="init">
 		<available property="composer.exists" file="${config.composer.phar}"/>
 	</target>
 
+	<!-- Check composer age -->
+	<target name="check-age" depends="init" if="config.composer.self-update.age">
+		<mleko.composer:isNewerThan file="${config.composer.phar}" age="${config.composer.self-update.age}" property="composer.phar.upToDate"/>
+	</target>
+
 	<!-- Self-update composer -->
-	<target name="self-update" if="${config.composer.self-update}" description="Self-update Composer" depends="init">
+	<target name="self-update" if="${config.composer.self-update}" unless="composer.phar.upToDate" description="Self-update Composer" depends="init, check-age">
 		<mleko.composer:command>self-update</mleko.composer:command>
 	</target>
 
@@ -56,7 +62,7 @@
 	</target>
 
 	<!-- Install dependencies -->
-	<target name="run" depends="init, self-install, self-update">
+	<target name="run" depends="init, self-install, self-update" description="Install/update project dependencies">
 		<!-- Check for composer.lock file. If exists run update, install in other case -->
 		<local name="composer.command"/>
 		<condition property="composer.command" value="update" else="install">
@@ -80,5 +86,37 @@
 			<echo message="composer @{command} ended" level="verbose"/>
 		</sequential>
 	</macrodef>
+
+	<!-- Check if specified file is newer than age in seconds -->
+	<scriptdef name="isNewerThan" uri="composer.ant.mleko" language="javascript">
+		<attribute name="file"/> <!-- The file to check. -->
+		<attribute name="age"/> <!-- The threshold of file age in seconds. -->
+		<attribute name="property"/> <!-- The name of property to set. -->
+		<attribute name="value"/> <!-- The value to set the property to. Defaults to "true". -->
+		<attribute name="else"/> <!-- The value to set the property to if the condition evaluates to false. By default the property will remain unset. -->
+		<![CDATA[
+			var fileName = attributes.get("file");
+			var age = attributes.get("age");
+			var property = attributes.get("property");
+			var value = attributes.get("value");
+			var elseValue = attributes.get("else");
+			
+			var maxAge = parseInt(age, 10);
+			
+			if(null === fileName)self.fail("`file` is required");
+			if(null === age || isNaN(maxAge))self.fail("`age` is required and must be valid int string");
+			if(null === property)self.fail("`property` is required");
+			if(null === value)value="true";
+				
+			var file = new java.io.File(fileName);
+			var ageInSeconds = (Date.now() - file.lastModified())/1000;
+			
+			if(ageInSeconds < maxAge){
+				project.setProperty(property, value);
+			}else if(null !== elseValue){
+				project.setProperty(property, elseValue);
+			}
+		]]>
+	</scriptdef>
 
 </project>
