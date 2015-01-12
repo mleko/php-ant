@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="test" basedir=".">
+	<!-- 
+	============
+	 PROPERTIES
+	============
+	-->
+	
+	<dirname property="include.basedir" file="${ant.file.test}"/>
+	<property name="properties.test" value="${basedir}/test.ant.properties"/>
+
+	<!-- Load properties from file -->
+	<condition property="test.properties.available" value="true">
+		<available file="${properties.test}"/>
+	</condition>
+	<target name="load-properties" if="test.properties.available">
+		<echo>Load properties from file ${properties.test}</echo>
+		<property file="${properties.test}" relative="true"/>
+	</target>
+
+	<!-- Init default properties -->
+	<target name="init" depends="load-properties">
+		<property name="config.test.bin.dir" value="${basedir}/vendor/bin" relative="true"/>
+		<property name="config.test.output.dir" value="${basedir}/build/test" relative="true"/>
+
+		<property name="config.test.codeception.bin" value="${config.test.bin.dir}/codecept" relative="true"/>
+	</target>
+
+	<!-- Dump config to log and file -->
+	<target name="dump-properties" depends="init" description="Init properties and dump them to file">
+		<echo>Dump properties to file ${properties.test}</echo>
+
+		<local name="test.properties.dir"/>
+		<dirname property="test.properties.dir" file="${test.composer}"/>
+		<mkdir dir="${test.properties.dir}"/>
+
+		<echoproperties prefix="config.test."/>
+		<echoproperties destfile="${properties.test}" prefix="config.test."/>
+	</target>
+
+	<!-- 
+	============
+	 TARGETS
+	============
+	-->
+	<target name="unit" description="Perform unit tests" depends="codeception-unit"/>
+
+	<target name="help">
+		<echo>Supported libraries:</echo>
+		<echo>codeception/codeception</echo>
+	</target>
+	
+	<!-- == Tests == -->
+
+	
+	<!-- codeception -->
+	<target name="codeception-exists" depends="init">
+		<condition property="test.codeception.exists" value="true">
+			<available file="${config.test.codeception.bin}"/>
+		</condition>
+	</target>
+	<target name="codeception-unit" if="test.codeception.exists" depends="codeception-exists">
+		<local name="test.codeception.output.dir"/>
+		<property name="test.codeception.output.dir" value="${basedir}/${config.test.output.dir}/codeception"/>
+		<mkdir dir="${test.codeception.output.dir}"/>
+		<exec executable="${config.test.codeception.bin}">
+			<arg line="run"/>
+			<arg line="--xml ${test.codeception.output.dir}/unit.xml"/>
+			<arg line="--html ${test.codeception.output.dir}/unit.html"/>
+			<arg line="--coverage-xml ${test.codeception.output.dir}/coverage.xml"/>
+			<arg line="--coverage-html ${test.codeception.output.dir}/coverage.html"/>
+			<arg line="unit"/>
+		</exec>
+	</target>
+</project>

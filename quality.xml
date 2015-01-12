@@ -58,7 +58,7 @@
 	-->
 	<target name="run" description="Run quality checks" depends="analyze, aggregate"/>
 	
-	<target name="analyze" depends="phpmetrics, phpmd, phpcpd, phploc, phpcs"/>
+	<target name="analyze" depends="php-lint, phpmetrics, phpmd, phpcpd, phploc, phpcs"/>
 	<target name="aggregate" depends="analyze, phpcodebrowser, phpdox"/>
 	
 	<target name="help">
@@ -75,6 +75,15 @@
 	</target>
 	
 	<!-- == Analyzers == -->
+	
+	<!-- lint -->
+	<target name="php-lint" depends="init">
+		<exec executable="/usr/bin/env">
+			<arg line="php"/>
+			<arg line="-l"/>
+			<arg line="${config.quality.src.dir}"/>
+		</exec>
+	</target>
 	
 	<!-- PHPMetrics https://github.com/Halleck45/PhpMetrics -->
 	<target name="phpmetrics-exists" depends="init">
