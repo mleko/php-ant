@@ -20,10 +20,10 @@
 
 	<!-- Init default properties -->
 	<target name="init" depends="load-properties">
-		<property name="config.quality.bin.dir" value="{$basedir}/vendor/bin" relative="true"/>
+		<property name="config.quality.bin.dir" value="${basedir}/vendor/bin" relative="true"/>
 		<property name="config.quality.src.dir" value="${basedir}/src" relative="true"/>
 		<property name="config.quality.output.dir" value="${basedir}/build/quality" relative="true"/>
-		<property name="config.quality.phpdox.project" value="ProjectName"/>
+		<property name="config.quality.phpdox.project" value="${ant.project.name}"/>
 		
 		<property name="config.quality.phpmetrics.bin" value="${config.quality.bin.dir}/phpmetrics" relative="true"/>
 		<property name="config.quality.phpmd.bin" value="${config.quality.bin.dir}/phpmd" relative="true"/>
@@ -64,14 +64,14 @@
 	<target name="help">
 		<echo>Supported libraries:</echo>
 		<echo>Analyzers</echo>
-		<echo>Halleck45/PhpMetrics</echo>
+		<echo>halleck45/phpmetricss</echo>
 		<echo>phpmd/phpmd</echo>
-		<echo>phpcpd/phpcpd</echo>
+		<echo>sebastian/phpcpd</echo>
 		<echo>phploc/phploc</echo>
 		<echo>squizlabs/php_codesniffer</echo>
 		<echo>Aggregators</echo>
 		<echo>mayflower/php-codebrowser</echo>
-		<echo>phpdox/phpdox</echo>
+		<echo>theseer/phpdox</echo>
 	</target>
 	
 	<!-- == Analyzers == -->
