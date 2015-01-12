@@ -56,7 +56,7 @@
 		<dirname property="composer.phar.dir" file="${config.composer.phar}"/>
 		<mkdir dir="${composer.phar.dir}"/>
 
-		<get src="https://getcomposer.org/config.composer.phar" dest="${config.composer.phar}" skipexisting="true"/>
+		<get src="https://getcomposer.org/composer.phar" dest="${config.composer.phar}" skipexisting="true"/>
 		<chmod file="${config.composer.phar}" perm="0755"/>
 		<echo message="composer installed" level="verbose"/>
 	</target>

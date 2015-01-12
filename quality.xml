@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="quality" basedir="." default="build" xmlns:mleko.quality="quality.ant.mleko">
+	<!-- 
+	============
+	 PROPERTIES
+	============
+	-->
+	
+	<dirname property="include.basedir" file="${ant.file.quality}"/>  
+	<property name="properties.quality" value="${basedir}/quality.ant.properties"/>
+
+	<!-- Load properties from file -->
+	<condition property="quality.properties.available" value="true">
+		<available file="${properties.quality}"/>
+	</condition>
+	<target name="load-properties" if="quality.properties.available">
+		<echo>Load properties from file ${properties.quality}</echo>
+		<property file="${properties.quality}" relative="true"/>
+	</target>
+
+	<!-- Init default properties -->
+	<target name="init" depends="load-properties">
+		<property name="config.quality.bin.dir" value="{$basedir}/vendor/bin" relative="true"/>
+		<property name="config.quality.src.dir" value="${basedir}/src" relative="true"/>
+		<property name="config.quality.output.dir" value="${basedir}/build/quality" relative="true"/>
+		<property name="config.quality.phpdox.project" value="ProjectName"/>
+		
+		<property name="config.quality.phpmetrics.bin" value="${config.quality.bin.dir}/phpmetrics" relative="true"/>
+		<property name="config.quality.phpmd.bin" value="${config.quality.bin.dir}/phpmd" relative="true"/>
+		<property name="config.quality.phpcpd.bin" value="${config.quality.bin.dir}/phpcpd" relative="true"/>
+		<property name="config.quality.phploc.bin" value="${config.quality.bin.dir}/phploc" relative="true"/>
+		<property name="config.quality.phpcs.bin" value="${config.quality.bin.dir}/phpcs" relative="true"/>
+		<property name="config.quality.pdepend.bin" value="${config.quality.bin.dir}/pdepend" relative="true"/>
+
+		<property name="config.quality.phpcodebrowser.bin" value="${config.quality.bin.dir}/phpcb" relative="true"/>
+		
+		<property name="config.quality.phpdox.bin" value="${config.quality.bin.dir}/phpdox" relative="true"/>
+		<property name="config.quality.phpdox.workdir" value="${config.quality.output.dir}/phpdox/workdir" relative="true"/>
+		<property name="config.quality.phpdox.outdir" value="${config.quality.output.dir}" relative="true"/>
+	</target>
+
+	<!-- Dump config to log and file -->
+	<target name="dump-properties" depends="init" description="Init properties and dump them to file">
+		<echo>Dump properties to file ${properties.quality}</echo>
+
+		<local name="quality.properties.dir"/>
+		<dirname property="quality.properties.dir" file="${quality.composer}"/>
+		<mkdir dir="${quality.properties.dir}"/>
+
+		<echoproperties prefix="config.quality."/>
+		<echoproperties destfile="${properties.quality}" prefix="config.quality."/>
+	</target>
+
+	<!-- 
+	============
+	 TARGETS
+	============
+	-->
+	<target name="run" description="Run quality checks" depends="analyze, aggregate"/>
+	
+	<target name="analyze" depends="phpmetrics, phpmd, phpcpd, phploc, phpcs"/>
+	<target name="aggregate" depends="analyze, phpcodebrowser, phpdox"/>
+	
+	<target name="help">
+		<echo>Supported libraries:</echo>
+		<echo>Analyzers</echo>
+		<echo>Halleck45/PhpMetrics</echo>
+		<echo>phpmd/phpmd</echo>
+		<echo>phpcpd/phpcpd</echo>
+		<echo>phploc/phploc</echo>
+		<echo>squizlabs/php_codesniffer</echo>
+		<echo>Aggregators</echo>
+		<echo>mayflower/php-codebrowser</echo>
+		<echo>phpdox/phpdox</echo>
+	</target>
+	
+	<!-- == Analyzers == -->
+	
+	<!-- PHPMetrics https://github.com/Halleck45/PhpMetrics -->
+	<target name="phpmetrics-exists" depends="init">
+		<condition property="quality.phpmetrics.exists" value="true">
+			<available file="${config.quality.phpmetrics.bin}"/>
+		</condition>
+	</target>
+	<target name="phpmetrics" if="quality.phpmetrics.exists" depends="phpmetrics-exists">
+		<exec executable="${config.quality.phpmetrics.bin}">
+			<arg value="-q" />
+			<arg line="--report-xml='${config.quality.output.dir}/phpmetrics/phpmetrics.xml'" />
+			<arg line="--report-html='${config.quality.output.dir}/phpmetrics/phpmetrics.html'" />
+			<arg line="--report-csv='${config.quality.output.dir}/phpmetrics/phpmetrics.csv'" />
+			<arg line="--violations-xml='${config.quality.output.dir}/phpmetrics/violations.xml'" />
+			
+			<arg value="${config.quality.src.dir}"/>
+		</exec>
+	</target>
+	
+	<!-- PHPMessDetector http://phpmd.org/ -->
+	<target name="phpmd-exists" depends="init">
+		<condition property="quality.phpmd.exists" value="true">
+			<available file="${config.quality.phpmd.bin}"/>
+		</condition>
+	</target>
+	<target name="phpmd" if="quality.phpmd.exists" depends="phpmd-exists">
+		<mkdir dir="${config.quality.output.dir}/phpmd"/>
+		
+		<exec executable="${config.quality.phpmd.bin}">
+			<arg value="${config.quality.src.dir}"/>
+			<arg value="xml" />
+			<arg line="cleancode,codesize,controversial,design,naming,unusedcode" />
+			<arg line="--reportfile ${config.quality.output.dir}/phpmd/phpmd.xml" />
+		</exec>
+		<echo>Result code 2 for PHPMD means it detected rule violations. Don't panic</echo>
+	</target>
+	
+	<!-- PHP Copy/Paste Detector https://github.com/sebastianbergmann/phpcpd -->
+	<target name="phpcpd-exists" depends="init">
+		<condition property="quality.phpcpd.exists" value="true">
+			<available file="${config.quality.phpcpd.bin}"/>
+		</condition>
+	</target>
+	<target name="phpcpd" if="quality.phpcpd.exists" depends="phpcpd-exists">
+		<mkdir dir="${config.quality.output.dir}/phpcpd"/>
+		<exec executable="${config.quality.phpcpd.bin}">
+			<arg line="--log-pmd ${config.quality.output.dir}/phpcpd/phpcpd.xml" />
+
+			<arg value="${config.quality.src.dir}"/>
+		</exec>
+	</target>
+
+	<!-- PHPLOC https://github.com/sebastianbergmann/phploc -->
+	<target name="phploc-exists" depends="init">
+		<condition property="quality.phploc.exists" value="true">
+			<available file="${config.quality.phploc.bin}"/>
+		</condition>
+	</target>
+	<target name="phploc" if="quality.phploc.exists" depends="phploc-exists">
+		<mkdir dir="${config.quality.output.dir}/phploc"/>
+		<exec executable="${config.quality.phploc.bin}">
+			<arg line="--log-csv ${config.quality.output.dir}/phploc/phploc.csv" />
+			<arg line="--log-xml ${config.quality.output.dir}/phploc/phploc.xml" />
+
+			<arg value="${config.quality.src.dir}"/>
+		</exec>
+	</target>
+
+	<!-- PHP_CodeSniffer https://github.com/squizlabs/PHP_CodeSniffer -->
+	<target name="phpcs-exists" depends="init">
+		<condition property="quality.phpcs.exists" value="true">
+			<available file="${config.quality.phpcs.bin}"/>
+		</condition>
+	</target>
+	<target name="phpcs" if="quality.phpcs.exists" depends="phpcs-exists">
+		<mkdir dir="${config.quality.output.dir}/phpcs"/>
+		<exec executable="${config.quality.phpcs.bin}">
+			<arg line="-n"/>
+			<arg line="--ignore='*/bower_components/*'"/>
+			<arg line="--standard=PSR1,PSR2"/>
+			<arg line="--report-full=${config.quality.output.dir}/phpcs/phpcs.full" />
+			<arg line="--report-xml=${config.quality.output.dir}/phpcs/phpcs.xml" />
+			<arg line="--report-checkstyle=${config.quality.output.dir}/phpcs/phpcs.checkstyle" />
+			<arg line="--report-csv=${config.quality.output.dir}/phpcs/phpcs.csv" />
+			<arg line="--report-json=${config.quality.output.dir}/phpcs/phpcs.json" />
+			<arg line="--report-summary=${config.quality.output.dir}/phpcs/phpcs.summary" />
+
+			<arg value="${config.quality.src.dir}"/>
+		</exec>
+		<echo>Result code 1 for PHPCS means it detected rule violations. Don't panic</echo>
+	</target>
+	
+	<!-- == Aggregators == -->
+	<!-- PHP_CodeBrowser https://github.com/Mayflower/PHP_CodeBrowser -->
+	<target name="phpcodebrowser-exists" depends="init">
+		<condition property="quality.phpcodebrowser.exists" value="true">
+			<available file="${config.quality.phpcodebrowser.bin}"/>
+		</condition>
+	</target>
+	<target name="phpcodebrowser" if="quality.phpcodebrowser.exists" depends="phpcodebrowser-exists">
+		<exec executable="${config.quality.phpcodebrowser.bin}">
+			<!--<arg value="-q" />-->
+			<arg line="--output='${config.quality.output.dir}/phpcodebrowser'" />
+			<arg line="--log='${config.quality.output.dir}'" />
+			<arg line="--source ${config.quality.src.dir}"/>
+			<arg line="-vvv"/>
+			<arg line="-E '#.*\.(js|css|jpg|jpeg|png|html|xml)#i'"/>
+		</exec>
+	</target>
+
+	<!-- phpDox – The PHP Documentation Generator http://phpdox.de/index.html -->
+	<target name="phpdox-exists" depends="init">
+		<condition property="quality.phpdox.exists" value="true">
+			<available file="${config.quality.phpdox.bin}"/>
+		</condition>
+	</target>
+	<target name="phpdox-config" depends="init, analyze" if="quality.phpdox.exists">
+		<echo level="debug">Create phpDox config file</echo>
+		<mkdir dir="${config.quality.output.dir}/phpdox/intermediate"/>
+		<local name="quality.phpdox.properties.file"/>
+		<property name="quality.phpdox.properties.file" value="${config.quality.output.dir}/phpdox/intermediate/properties.xml" relative="true"/>
+		<property name="quality.phpdox.config.file" value="${config.quality.output.dir}/phpdox/intermediate/phpdox.xml" relative="true"/>
+		<echoproperties destfile="${quality.phpdox.properties.file}" format="xml"/>
+		<xslt in="${quality.phpdox.properties.file}" out="${quality.phpdox.config.file}" style="${include.basedir}/xsl/phpdox.xsl"/>
+	</target>
+	<target name="phpdox" depends="init, phpdox-exists, phpdox-config" if="quality.phpdox.exists">
+		<exec executable="${config.quality.phpdox.bin}">
+			<arg line="-f ${quality.phpdox.config.file}" />
+		</exec>
+	</target>
+
+	<!-- 
+	============
+	 MACROS
+	============
+	-->
+
+</project>
