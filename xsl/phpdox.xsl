@@ -132,7 +132,7 @@
 						<file name="phpcs/phpcs.xml"/>
 					</source>
 					<source type="checkstyle">
-						<file name="phpcs/phpcs.checkstyle"/>
+						<file name="phpcs/phpcs.checkstyle.xml"/>
 					</source>
 				</xsl:if>
 

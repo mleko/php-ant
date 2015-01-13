@@ -166,7 +166,7 @@
 			<arg line="--standard=PSR1,PSR2"/>
 			<arg line="--report-full=${config.quality.output.dir}/phpcs/phpcs.full" />
 			<arg line="--report-xml=${config.quality.output.dir}/phpcs/phpcs.xml" />
-			<arg line="--report-checkstyle=${config.quality.output.dir}/phpcs/phpcs.checkstyle" />
+			<arg line="--report-checkstyle=${config.quality.output.dir}/phpcs/phpcs.checkstyle.xml" />
 			<arg line="--report-csv=${config.quality.output.dir}/phpcs/phpcs.csv" />
 			<arg line="--report-json=${config.quality.output.dir}/phpcs/phpcs.json" />
 			<arg line="--report-summary=${config.quality.output.dir}/phpcs/phpcs.summary" />
@@ -190,7 +190,7 @@
 			<arg line="--log='${config.quality.output.dir}'" />
 			<arg line="--source ${config.quality.src.dir}"/>
 			<arg line="-vvv"/>
-			<arg line="-E '#.*\.(js|css|jpg|jpeg|png|html|xml)#i'"/>
+			<arg line="-E '#(.*\.(js|css|jpg|jpeg|png|html|xml))|(*/bower_components/*)#i'"/>
 		</exec>
 	</target>
 
