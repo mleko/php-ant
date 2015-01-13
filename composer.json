@@ -1,4 +1,24 @@
 {
     "name": "mleko/php-ant",
-    "require": {}
+    "type": "library",
+    "description": "Ant scripts to automate build process of PHP projects.",
+    "keywords": ["automation"],
+    "authors":[
+        {
+            "name": "mleko"
+        }
+    ],
+    "license": "MIT",
+    "require": {},
+    "suggest":{
+        "codeception/codeception":"",
+        
+		"halleck45/phpmetrics":"",
+		"phpmd/phpmd":"",
+		"sebastian/phpcpd":"",
+		"phploc/phploc":"",
+		"squizlabs/php_codesniffer":"",
+		"mayflower/php-codebrowser":"",
+		"theseer/phpdox":""
+    }
 }

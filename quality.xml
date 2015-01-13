@@ -64,7 +64,7 @@
 	<target name="help">
 		<echo>Supported libraries:</echo>
 		<echo>Analyzers</echo>
-		<echo>halleck45/phpmetricss</echo>
+		<echo>halleck45/phpmetrics</echo>
 		<echo>phpmd/phpmd</echo>
 		<echo>sebastian/phpcpd</echo>
 		<echo>phploc/phploc</echo>
