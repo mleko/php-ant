@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="quality" basedir="." default="build" xmlns:mleko.quality="quality.ant.mleko">
+<project name="quality" basedir="." default="run" xmlns:mleko.quality="quality.ant.mleko">
 	<!-- 
 	============
 	 PROPERTIES

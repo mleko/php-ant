@@ -60,7 +60,6 @@
 		</condition>
 	</target>
 	<target name="codeception-unit" if="test.codeception.exists" depends="codeception-exists">
-		<local name="test.codeception.output.dir"/>
 		<property name="test.codeception.output.dir" value="${basedir}/${config.test.output.dir}/codeception"/>
 		<mkdir dir="${test.codeception.output.dir}"/>
 		<exec executable="${config.test.codeception.bin}">

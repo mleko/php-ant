@@ -100,6 +100,24 @@
 					</history>
 				</source>
 
+				<!-- add codeception(phpunit) output -->
+				<!--<xsl:if test="/properties/property[@name='test.codeception.exists']">-->
+					<!--<source type="clover">-->
+						<!--<file>-->
+							<!--<xsl:attribute name="path">-->
+								<!--<xsl:value-of select="concat(/properties/property[@name='test.codeception.output.dir']/@value, '/coverage.xml')"/>-->
+							<!--</xsl:attribute>-->
+						<!--</file>-->
+					<!--</source>-->
+					<!--<source type="phpunit">-->
+						<!--<file>-->
+							<!--<xsl:attribute name="name">-->
+								<!--<xsl:value-of select="concat(/properties/property[@name='test.codeception.output.dir']/@value, '/unit.xml')"/>-->
+							<!--</xsl:attribute>-->
+						<!--</file>-->
+					<!--</source>-->
+				<!--</xsl:if>-->
+
 
 				<!-- enrichment source -->
 				<!--<source type="checkstyle">-->
