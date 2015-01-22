@@ -122,14 +122,5 @@
 			}
 		]]>
 	</scriptdef>
-	
-	<!-- Basic composer self-install + install to preload composer. Copy to mail build script -->
-	<target name="composer-init">
-		<get src="https://getcomposer.org/composer.phar" dest="${basedir}/composer.phar" skipexisting="true"/>
-		<chmod file="${basedir}/composer.phar" perm="0755"/>
-		<exec executable="${basedir}/composer.phar">
-			<arg line="install"/>
-		</exec>
-	</target>
 
 </project>
