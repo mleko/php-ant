@@ -40,7 +40,7 @@
 
 	<!-- Check composer age -->
 	<target name="check-age" depends="init" if="config.composer.self-update.age">
-		<mleko.composer:isNewerThan file="${config.composer.phar}" age="${config.composer.self-update.age}" property="composer.phar.upToDate"/>
+        <!-- <mleko.composer:isNewerThan file="${config.composer.phar}" age="${config.composer.self-update.age}" property="composer.phar.upToDate"/> -->
 	</target>
 
 	<!-- Self-update composer -->

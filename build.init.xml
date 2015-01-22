@@ -7,7 +7,7 @@
 	<target name="composer">
 		<get src="https://getcomposer.org/composer.phar" dest="${basedir}/composer.phar" skipexisting="true"/>
 		<chmod file="${basedir}/composer.phar" perm="0755"/>
-		<exec executable="${basedir}/composer.phar">
+		<exec executable="${basedir}/composer.phar" failonerror="true">
 			<arg line="install"/>
 		</exec>
 	</target>
