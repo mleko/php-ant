@@ -80,10 +80,14 @@
 		<text name="command"/>
 		<attribute name="options" default=""/>
 		<sequential>
+			<local name="rel"/>
+			<local name="full"/>
 			<local name="opts"/>
 			<property name="opts" value="--no-interaction @{options}"/>
+			<property name="rel" value="${config.composer.phar}" relative="true"/>
+			<property name="full" value="${basedir}/${rel}"/>
 			<echo message="Run composer @{command}" level="verbose"/>
-			<exec executable="${config.composer.phar}">
+			<exec executable="${full}">
 				<arg line="${opts}"/>
 				<arg value="@{command}"/>
 			</exec>
