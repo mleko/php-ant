@@ -39,8 +39,25 @@
 	</target>
 
 	<!-- Check composer age -->
-	<target name="check-age" depends="init" if="config.composer.self-update.age">
-        <!-- <mleko.composer:isNewerThan file="${config.composer.phar}" age="${config.composer.self-update.age}" property="composer.phar.upToDate"/> -->
+	<target name="check-age" depends="init, check-age-script, check-age-tstamp" if="config.composer.self-update.age">
+
+	</target>
+	<target name="check-java17">
+		<antversion property="quality.java1.7" atleast="1.7"/>
+	</target>
+	<target name="check-age-script" depends="init, check-java17" if="quality.java1.7">
+		<mleko.composer:isNewerThan file="${config.composer.phar}" age="${config.composer.self-update.age}" property="composer.phar.upToDate"/>
+	</target>
+	<target name="check-age-tstamp" depends="init, check-java17" unless="quality.java1.7">
+		<local name="date"/>
+		<local name="tempfile"/>
+		<tstamp>
+			<format property="date" offset="-${config.composer.self-update.age}" unit="second" pattern="MM/dd/yyyy hh:mm aa"/>
+		</tstamp>
+		<tempfile property="tempfile" createfile="true" prefix="~composerCheckAge" postfix=".tmp" deleteonexit="true"/>
+		<touch file="${tempfile}" datetime="${date}"/>
+		<uptodate property="composer.phar.upToDate" targetfile="${config.composer.phar}" srcfile="${tempfile}"/>
+		<delete file="${tempfile}"/>
 	</target>
 
 	<!-- Self-update composer -->
@@ -65,7 +82,7 @@
 	<target name="install" depends="init, self-install, self-update" description="Install project dependencies">
 		<mleko.composer:command options="--optimize-autoloader">install</mleko.composer:command>
 	</target>
-	
+
 	<target name="update" depends="init, self-install, self-update" description="Install/update project dependencies">
 		<!-- Check for composer.lock file. If exists run update, install in other case -->
 		<local name="composer.command"/>
@@ -97,11 +114,17 @@
 
 	<!-- Check if specified file is newer than age in seconds -->
 	<scriptdef name="isNewerThan" uri="composer.ant.mleko" language="javascript">
-		<attribute name="file"/> <!-- The file to check. -->
-		<attribute name="age"/> <!-- The threshold of file age in seconds. -->
-		<attribute name="property"/> <!-- The name of property to set. -->
-		<attribute name="value"/> <!-- The value to set the property to. Defaults to "true". -->
-		<attribute name="else"/> <!-- The value to set the property to if the condition evaluates to false. By default the property will remain unset. -->
+		<!-- The file to check. -->
+		<attribute name="file"/>
+		<!-- The threshold of file age in seconds. -->
+		<attribute name="age"/>
+		<!-- The name of property to set. -->
+		<attribute name="property"/>
+		<!-- The value to set the property to. Defaults to "true". -->
+		<attribute name="value"/>
+		<!-- The value to set the property to if the condition evaluates to false. By default the property will remain unset. -->
+		<attribute name="else"/>
+		
 		<![CDATA[
 			var fileName = attributes.get("file");
 			var age = attributes.get("age");
