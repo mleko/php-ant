@@ -59,7 +59,7 @@
 		<tstamp>
 			<format property="date" offset="-${config.composer.self-update.age}" unit="second" pattern="MM/dd/yyyy hh:mm aa"/>
 		</tstamp>
-		<tempfile property="tempfile" createfile="true" prefix="~composerCheckAge" postfix=".tmp" deleteonexit="true"/>
+		<tempfile property="tempfile" createfile="true" prefix="~composerCheckAge" suffix=".tmp" deleteonexit="true"/>
 		<touch file="${tempfile}" datetime="${date}"/>
 		<uptodate property="composer.phar.upToDate" targetfile="${config.composer.phar}" srcfile="${tempfile}"/>
 		<delete file="${tempfile}"/>
