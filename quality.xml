@@ -29,7 +29,10 @@
 		<property name="config.quality.phpmd.bin" value="${config.quality.bin.dir}/phpmd" relative="true"/>
 		<property name="config.quality.phpcpd.bin" value="${config.quality.bin.dir}/phpcpd" relative="true"/>
 		<property name="config.quality.phploc.bin" value="${config.quality.bin.dir}/phploc" relative="true"/>
+        
 		<property name="config.quality.phpcs.bin" value="${config.quality.bin.dir}/phpcs" relative="true"/>
+		<property name="config.quality.phpcs.standard" value="PSR1,PSR2"/>
+        
 		<property name="config.quality.pdepend.bin" value="${config.quality.bin.dir}/pdepend" relative="true"/>
 
 		<property name="config.quality.phpcodebrowser.bin" value="${config.quality.bin.dir}/phpcb" relative="true"/>
@@ -78,7 +81,7 @@
 	
 	<!-- lint -->
 	<target name="php-lint" depends="init">
-		<exec executable="/usr/bin/env">
+		<exec executable="/usr/bin/env" failonerror="true">
 			<arg line="php"/>
 			<arg line="-l"/>
 			<arg line="${config.quality.src.dir}"/>
@@ -163,7 +166,7 @@
 		<exec executable="${config.quality.phpcs.bin}">
 			<arg line="-n"/>
 			<arg line="--ignore='*/bower_components/*'"/>
-			<arg line="--standard=PSR1,PSR2"/>
+			<arg line="--standard=${config.quality.phpcs.standard}"/>
 			<arg line="--report-full=${config.quality.output.dir}/phpcs/phpcs.full" />
 			<arg line="--report-xml=${config.quality.output.dir}/phpcs/phpcs.xml" />
 			<arg line="--report-checkstyle=${config.quality.output.dir}/phpcs/phpcs.checkstyle.xml" />
