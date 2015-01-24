@@ -42,13 +42,18 @@
 	<target name="check-age" depends="init, check-age-script, check-age-tstamp" if="config.composer.self-update.age">
 
 	</target>
-	<target name="check-java17">
-		<antversion property="quality.java1.7" atleast="1.7"/>
+	<target name="check-javax-script">
+		<condition property="quality.javax-script.available">
+			<and>
+				<contains string="${java.runtime.name}" substring="Java(TM)"/>
+				<antversion atleast="1.6"/>
+			</and>
+		</condition>
 	</target>
-	<target name="check-age-script" depends="init, check-java17" if="quality.java1.7">
+	<target name="check-age-script" depends="init, check-javax-script" if="quality.javax-script.available">
 		<mleko.composer:isNewerThan file="${config.composer.phar}" age="${config.composer.self-update.age}" property="composer.phar.upToDate"/>
 	</target>
-	<target name="check-age-tstamp" depends="init, check-java17" unless="quality.java1.7">
+	<target name="check-age-tstamp" depends="init, check-javax-script" unless="quality.javax-script.available">
 		<local name="date"/>
 		<local name="tempfile"/>
 		<tstamp>
