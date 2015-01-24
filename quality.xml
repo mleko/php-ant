@@ -26,7 +26,10 @@
 		<property name="config.quality.phpdox.project" value="${ant.project.name}"/>
 		
 		<property name="config.quality.phpmetrics.bin" value="${config.quality.bin.dir}/phpmetrics" relative="true"/>
+		
 		<property name="config.quality.phpmd.bin" value="${config.quality.bin.dir}/phpmd" relative="true"/>
+		<property name="config.quality.phpcd.rulesets" value="cleancode,codesize,controversial,design,naming,unusedcode"/>
+		
 		<property name="config.quality.phpcpd.bin" value="${config.quality.bin.dir}/phpcpd" relative="true"/>
 		<property name="config.quality.phploc.bin" value="${config.quality.bin.dir}/phploc" relative="true"/>
         
@@ -118,7 +121,7 @@
 		<exec executable="${config.quality.phpmd.bin}">
 			<arg value="${config.quality.src.dir}"/>
 			<arg value="xml" />
-			<arg line="cleancode,codesize,controversial,design,naming,unusedcode" />
+			<arg line="${config.quality.phpcd.rulesets}" />
 			<arg line="--reportfile ${config.quality.output.dir}/phpmd/phpmd.xml" />
 		</exec>
 		<echo>Result code 2 for PHPMD means it detected rule violations. Don't panic</echo>
