@@ -5,35 +5,18 @@
 	 PROPERTIES
 	============
 	-->
-	
-	<property name="properties.symfony" value="${basedir}/symfony.ant.properties"/>
 
-	<!-- Load properties from file -->
-	<condition property="symfony.properties.available" value="true">
-		<available file="${properties.symfony}"/>
-	</condition>
-	<target name="load-properties" if="symfony.properties.available">
-		<echo>Load properties from file ${properties.symfony}</echo>
-		<property file="${properties.symfony}" relative="true"/>
-	</target>
+	<dirname property="include.basedir" file="${ant.file.quality}"/>
+	<include file="${include.basedir}/common.xml"/>
 
 	<!-- Init default properties -->
-	<target name="init" depends="load-properties">
-		<property name="config.symfony.env" value="dev"/>
-		<property name="config.symfony.console" value="${basedir}/app/console" relative="true"/>
+	<target name="init" depends="common.init">
+		<property name="phpant.config.symfony.env" value="dev"/>
+		<property name="phpant.config.symfony.console" value="${basedir}/app/console" relative="true"/>
 	</target>
 
 	<!-- Dump config to log and file -->
-	<target name="dump-properties" depends="init" description="Init properties and dump them to file">
-		<echo>Dump composer properties to file ${properties.symfony}</echo>
-
-		<local name="symfony.properties.dir"/>
-		<dirname property="symfony.properties.dir" file="${symfony.composer}"/>
-		<mkdir dir="${symfony.properties.dir}"/>
-
-		<echoproperties prefix="config.symfony."/>
-		<echoproperties destfile="${properties.symfony}" prefix="config.symfony."/>
-	</target>
+	<target name="dump-properties" depends="init, common.dump-properties" description="Init properties and dump them to file"/>
 
 	<!-- 
 	============
@@ -41,7 +24,7 @@
 	============
 	-->
 	<target name="build" description="Clear cache, prepare assets" depends="cache-clear, assetic, assets">
-		<echo>Symfony app prepared for env: ${config.symfony.env}</echo>
+		<echo>Symfony app prepared for env: ${phpant.config.symfony.env}</echo>
 	</target>
 
 	<target name="cache-clear" description="Cleanup cache" depends="init">
@@ -71,9 +54,9 @@
 		<attribute name="options" default=""/>
 		<sequential>
 			<local name="opts"/>
-			<property name="opts" value="--env=${config.symfony.env} @{options}"/>
+			<property name="opts" value="--env=${phpant.config.symfony.env} @{options}"/>
 			<echo message="Run symfony console @{command}" level="verbose"/>
-			<exec executable="${config.symfony.console}">
+			<exec executable="${phpant.config.symfony.console}">
 				<arg line="${opts}"/>
 				<arg value="@{command}"/>
 			</exec>

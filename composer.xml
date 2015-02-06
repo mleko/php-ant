@@ -1,104 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="composer" default="update" xmlns:mleko.composer="composer.ant.mleko">
-	<property name="properties.composer" value="${basedir}/composer.ant.properties"/>
+<project name="composer" default="update" xmlns:phpant.composer="composer.phpant.mleko">
+
+	<property name="phpant.properties" value="${basedir}/phpant.properties"/>
 
 	<!-- Load properties from file -->
 	<condition property="composer.properties.available" value="true">
-		<available file="${properties.composer}"/>
+		<available file="${phpant.properties}"/>
 	</condition>
 	<target name="load-properties" if="composer.properties.available">
-		<echo>Load properties from file ${properties.composer}</echo>
-		<property file="${properties.composer}" relative="true"/>
+		<echo level="verbose">Load properties from file ${phpant.properties}</echo>
+		<property file="${phpant.properties}" relative="true"/>
 	</target>
 
 	<!-- Init default properties -->
 	<target name="init" depends="load-properties">
-		<property name="config.composer.self-update" value="true"/>
-		<property name="config.composer.self-update.age" value="604800"/>
+		<property name="phpant.config.composer.self-update" value="true"/>
+		<property name="phpant.config.composer.self-update.age" value="604800"/>
 
-		<property name="config.composer.project.dir" value="${basedir}" relative="true"/>
-
-		<property name="config.composer.phar" location="${basedir}/build/tools/composer.phar" relative="true"/>
+		<property name="phpant.config.composer.phar" location="${basedir}/build/workdir/tools/composer.phar" relative="true"/>
 	</target>
 
-	<!-- Dump config to log and file -->
-	<target name="dump-properties" depends="init" description="Init properties and dump them to file">
-		<echo>Dump composer properties to file ${properties.composer}</echo>
-
-		<local name="composer.properties.dir"/>
-		<dirname property="composer.properties.dir" file="${properties.composer}"/>
-		<mkdir dir="${composer.properties.dir}"/>
-
-		<echoproperties prefix="config.composer."/>
-		<echoproperties destfile="${properties.composer}" prefix="config.composer."/>
-	</target>
+	<!-- ==== TARGETS ==== -->
 
 	<!-- Check if composer already exists -->
 	<target name="exists" depends="init">
-		<available property="composer.exists" file="${config.composer.phar}"/>
+		<available property="phpant.data.composer.exists" file="${phpant.config.composer.phar}"/>
 	</target>
 
 	<!-- Check composer age -->
-	<target name="check-age" depends="init, check-age-script, check-age-tstamp" if="config.composer.self-update.age">
+	<target name="check-age" depends="init, check-age-script, check-age-tstamp" if="phpant.config.composer.self-update.age">
 
 	</target>
 	<target name="check-javax-script">
-		<condition property="quality.javax-script.available">
+		<condition property="phpant.data.quality.javax-script.available">
 			<and>
 				<contains string="${java.runtime.name}" substring="Java(TM)"/>
 				<antversion atleast="1.6"/>
 			</and>
 		</condition>
 	</target>
-	<target name="check-age-script" depends="init, check-javax-script" if="quality.javax-script.available">
-		<mleko.composer:isNewerThan file="${config.composer.phar}" age="${config.composer.self-update.age}" property="composer.phar.upToDate"/>
+	<target name="check-age-script" depends="init, check-javax-script" if="phpant.data.quality.javax-script.available">
+		<phpant.composer:isNewerThan file="${phpant.config.composer.phar}" age="${phpant.config.composer.self-update.age}" property="composer.phar.upToDate"/>
 	</target>
-	<target name="check-age-tstamp" depends="init, check-javax-script" unless="quality.javax-script.available">
+	<target name="check-age-tstamp" depends="init, check-javax-script" unless="phpant.data.quality.javax-script.available">
 		<local name="date"/>
 		<local name="tempfile"/>
 		<tstamp>
-			<format property="date" offset="-${config.composer.self-update.age}" unit="second" pattern="MM/dd/yyyy hh:mm aa"/>
+			<format property="date" offset="-${phpant.config.composer.self-update.age}" unit="second" pattern="MM/dd/yyyy hh:mm aa"/>
 		</tstamp>
 		<tempfile property="tempfile" createfile="true" prefix="~composerCheckAge" suffix=".tmp" deleteonexit="true"/>
 		<touch file="${tempfile}" datetime="${date}"/>
-		<uptodate property="composer.phar.upToDate" targetfile="${config.composer.phar}" srcfile="${tempfile}"/>
+		<uptodate property="composer.phar.upToDate" targetfile="${phpant.config.composer.phar}" srcfile="${tempfile}"/>
 		<delete file="${tempfile}"/>
 	</target>
 
 	<!-- Self-update composer -->
-	<target name="self-update" if="${config.composer.self-update}" unless="composer.phar.upToDate" description="Self-update Composer" depends="init, check-age">
-		<mleko.composer:command>self-update</mleko.composer:command>
+	<target name="self-update" if="${phpant.config.composer.self-update}" unless="composer.phar.upToDate" description="Self-update Composer" depends="init, check-age">
+		<phpant.composer:command>self-update</phpant.composer:command>
 	</target>
 
 	<!-- Create dir and install composer -->
-	<target name="self-install" unless="composer.exists" depends='init, exists' description="Fetch Composer if it doesn't exist">
+	<target name="self-install" unless="phpant.data.composer.exists" depends='init, exists' description="Fetch Composer if it doesn't exist">
 		<echo message="Installing composer" level="verbose"/>
 
 		<local name="composer.phar.dir"/>
-		<dirname property="composer.phar.dir" file="${config.composer.phar}"/>
+		<dirname property="composer.phar.dir" file="${phpant.config.composer.phar}"/>
 		<mkdir dir="${composer.phar.dir}"/>
 
-		<get src="https://getcomposer.org/composer.phar" dest="${config.composer.phar}" skipexisting="true"/>
-		<chmod file="${config.composer.phar}" perm="0755"/>
+		<get src="https://getcomposer.org/composer.phar" dest="${phpant.config.composer.phar}" skipexisting="true"/>
+		<chmod file="${phpant.config.composer.phar}" perm="0755"/>
 		<echo message="composer installed" level="verbose"/>
 	</target>
 
 	<!-- Install dependencies -->
 	<target name="install" depends="init, self-install, self-update" description="Install project dependencies">
-		<mleko.composer:command options="--optimize-autoloader">install</mleko.composer:command>
+		<phpant.composer:command options="--optimize-autoloader">install</phpant.composer:command>
 	</target>
 
 	<target name="update" depends="init, self-install, self-update" description="Install/update project dependencies">
-		<!-- Check for composer.lock file. If exists run update, install in other case -->
-		<local name="composer.command"/>
-		<condition property="composer.command" value="update" else="install">
-			<available file="${config.composer.project.dir}/composer.lock"/>
-		</condition>
-		<mleko.composer:command options="--optimize-autoloader">${composer.command}</mleko.composer:command>
+		<phpant.composer:command options="--optimize-autoloader">update</phpant.composer:command>
 	</target>
 
 	<!-- Macro simplifying use of composer -->
-	<macrodef name="command" uri="composer.ant.mleko">
+	<macrodef name="command" uri="composer.phpant.mleko">
 		<text name="command"/>
 		<attribute name="options" default=""/>
 		<sequential>
@@ -106,7 +90,7 @@
 			<local name="full"/>
 			<local name="opts"/>
 			<property name="opts" value="--no-interaction @{options}"/>
-			<property name="rel" value="${config.composer.phar}" relative="true"/>
+			<property name="rel" value="${phpant.config.composer.phar}" relative="true"/>
 			<property name="full" value="${basedir}/${rel}"/>
 			<echo message="Run composer @{command}" level="verbose"/>
 			<exec executable="${full}">
@@ -118,7 +102,7 @@
 	</macrodef>
 
 	<!-- Check if specified file is newer than age in seconds -->
-	<scriptdef name="isNewerThan" uri="composer.ant.mleko" language="javascript">
+	<scriptdef name="isNewerThan" uri="composer.phpant.mleko" language="javascript">
 		<!-- The file to check. -->
 		<attribute name="file"/>
 		<!-- The threshold of file age in seconds. -->
@@ -129,7 +113,7 @@
 		<attribute name="value"/>
 		<!-- The value to set the property to if the condition evaluates to false. By default the property will remain unset. -->
 		<attribute name="else"/>
-		
+
 		<![CDATA[
 			var fileName = attributes.get("file");
 			var age = attributes.get("age");

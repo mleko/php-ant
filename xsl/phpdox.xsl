@@ -12,15 +12,15 @@
 	<project>
 		<!--  @name    - The name of the project -->
 		<xsl:attribute name="name">
-			<xsl:value-of select="/properties/property[@name='config.quality.phpdox.project']/@value"/>
+			<xsl:value-of select="/properties/property[@name='phpant.config.quality.phpdox.project']/@value"/>
 		</xsl:attribute>
 		<!--  @source  - The source directory of the application to process -->
 		<xsl:attribute name="source">
-			<xsl:value-of select="/properties/property[@name='config.quality.src.dir']/@value"/>
+			<xsl:value-of select="/properties/property[@name='phpant.config.quality.src.dir']/@value"/>
 		</xsl:attribute>
 		<!--  @workdir - The directory to store the xml data files in -->
 		<xsl:attribute name="workdir">
-			<xsl:value-of select="/properties/property[@name='config.quality.phpdox.workdir']/@value"/>
+			<xsl:value-of select="/properties/property[@name='phpant.config.quality.phpdox.workdir']/@value"/>
 		</xsl:attribute>
 
 		<!--  A phpDox config file can define additional variables (properties) per project -->
@@ -67,7 +67,7 @@
 		<generator>
 			<!-- @output - (Base-)Directory to store output data in -->
 			<xsl:attribute name="output">
-				<xsl:value-of select="/properties/property[@name='config.quality.phpdox.outdir']/@value"/>
+				<xsl:value-of select="/properties/property[@name='phpant.config.quality.phpdox.outdir']/@value"/>
 			</xsl:attribute>
 
 			<!-- A generation process consists of one or more build tasks and of (optional) enrich sources -->
@@ -75,14 +75,14 @@
 			<enrich>
 				<!-- @base - (Base-)Directory of datafiles used for enrich process -->
 				<xsl:attribute name="base">
-					<xsl:value-of select="/properties/property[@name='config.quality.phpdox.outdir']/@value"/>
+					<xsl:value-of select="/properties/property[@name='phpant.config.quality.phpdox.outdir']/@value"/>
 				</xsl:attribute>
 
 				<!-- add build information - this should always be enabled -->
 				<source type="build"/>
 
 				<!-- add phploc output -->
-				<xsl:if test="/properties/property[@name='quality.phploc.exists']">
+				<xsl:if test="/properties/property[@name='phpant.data.quality.phploc.exists']">
 					<source type="phploc">
 						<file name="phploc/phploc.xml"/>
 					</source>
@@ -95,7 +95,7 @@
 					<git binary="/usr/bin/git"/>
 					<history enabled="true" limit="15">
 						<xsl:attribute name="cache">
-							<xsl:value-of select="concat(/properties/property[@name='config.quality.phpdox.workdir']/@value, '/gitlog.xml')"/>
+							<xsl:value-of select="concat(/properties/property[@name='phpant.config.quality.phpdox.workdir']/@value, '/gitlog.xml')"/>
 						</xsl:attribute>
 					</history>
 				</source>
@@ -138,14 +138,14 @@
 				<!--</source> -->
 
 				<!-- PHPMessDetector -->
-				<xsl:if test="/properties/property[@name='quality.phpmd.exists']">
+				<xsl:if test="/properties/property[@name='phpant.data.quality.phpmd.exists']">
 					<source type="pmd">
 						<file name="phpmd/phpmd.xml"/>
 					</source>
 				</xsl:if>
 
 				<!-- PHPCS -->
-				<xsl:if test="/properties/property[@name='quality.phpcs.exists']">
+				<xsl:if test="/properties/property[@name='phpant.data.quality.phpcs.exists']">
 					<source type="phpcs">
 						<file name="phpcs/phpcs.xml"/>
 					</source>
