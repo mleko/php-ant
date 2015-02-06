@@ -5,7 +5,7 @@
 	 PROPERTIES
 	============
 	-->
-	
+
 	<dirname property="include.basedir" file="${ant.file.test}"/>
 	<property name="properties.test" value="${basedir}/test.ant.properties"/>
 
@@ -24,6 +24,8 @@
 		<property name="config.test.output.dir" value="${basedir}/build/test" relative="true"/>
 
 		<property name="config.test.codeception.bin" value="${config.test.bin.dir}/codecept" relative="true"/>
+		<property name="config.test.codeception.output.dir" value="${basedir}/${config.test.output.dir}/codeception"/>
+		<property name="config.test.codeception.codecoverage" value="true"/>
 	</target>
 
 	<!-- Dump config to log and file -->
@@ -49,26 +51,32 @@
 		<echo>Supported libraries:</echo>
 		<echo>codeception/codeception</echo>
 	</target>
-	
+
 	<!-- == Tests == -->
 
-	
+
 	<!-- codeception -->
 	<target name="codeception-exists" depends="init">
 		<condition property="test.codeception.exists" value="true">
 			<available file="${config.test.codeception.bin}"/>
 		</condition>
 	</target>
+	
 	<target name="codeception-unit" if="test.codeception.exists" depends="codeception-exists">
-		<property name="test.codeception.output.dir" value="${basedir}/${config.test.output.dir}/codeception"/>
-		<mkdir dir="${test.codeception.output.dir}"/>
+		<mkdir dir="${config.test.codeception.output.dir}"/>
+		<local name="test.codeception.coverage"/>
+		<local name="test.codeception.command"/>
+		<condition property="test.codeception.coverage"
+				value="--coverage-xml ${config.test.codeception.output.dir}/coverage.xml --coverage-html ${config.test.codeception.output.dir}/coverage"
+				else="">
+			<istrue value="${config.test.codeception.codecoverage}"/>
+		</condition>
+		<property name="test.codeception.command" value="${test.codeception.coverage} unit"/>
 		<exec executable="${config.test.codeception.bin}">
 			<arg line="run"/>
-			<arg line="--xml ${test.codeception.output.dir}/unit.xml"/>
-			<arg line="--html ${test.codeception.output.dir}/unit.html"/>
-			<arg line="--coverage-xml ${test.codeception.output.dir}/coverage.xml"/>
-			<arg line="--coverage-html ${test.codeception.output.dir}/coverage.html"/>
-			<arg line="unit"/>
+			<arg line="--xml ${config.test.codeception.output.dir}/unit.xml"/>
+			<arg line="--html ${config.test.codeception.output.dir}/unit.html"/>
+			<arg line="${test.codeception.command}"/>
 		</exec>
 	</target>
 </project>

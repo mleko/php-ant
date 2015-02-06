@@ -18,7 +18,7 @@
 
 		<property name="config.composer.project.dir" value="${basedir}" relative="true"/>
 
-		<property name="config.composer.phar" location="${basedir}/composer.phar" relative="true"/>
+		<property name="config.composer.phar" location="${basedir}/build/tools/composer.phar" relative="true"/>
 	</target>
 
 	<!-- Dump config to log and file -->
