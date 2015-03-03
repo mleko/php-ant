@@ -93,7 +93,9 @@
 			<property name="rel" value="${phpant.config.composer.phar}" relative="true"/>
 			<property name="full" value="${basedir}/${rel}"/>
 			<echo message="Run composer @{command}" level="verbose"/>
-			<exec executable="${full}">
+			<exec executable="/usr/bin/env">
+				<arg line="php"/>
+				<arg line="${full}"/>
 				<arg line="${opts}"/>
 				<arg value="@{command}"/>
 			</exec>
