@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="common" xmlns:phpant.common="common.phpant.mleko">
+<project name="common">
 	
 	<property name="phpant.properties" value="${basedir}/phpant.properties"/>
 
 	<!-- Load properties from file -->
-	<target name="properties-exists">
+	<target name="properties-file-exists">
 		<condition property="phpant.data.common.properties.available" value="true">
 			<available file="${phpant.properties}"/>
 		</condition>
 	</target>
 	
-	<target name="load-properties" if="phpant.data.common.properties.available" depends="properties-exists">
+	<target name="load-properties" if="phpant.data.common.properties.available" depends="properties-file-exists">
 		<echo>Load properties from file ${phpant.properties}</echo>
 		<property file="${phpant.properties}" relative="true"/>
+		<property name="phpant.data.common.properties.done" value="true"/>
 	</target>
 
 	<!-- Load properties and set default values for missing ones -->
-	<target name="init" depends="load-properties">
+	<target name="init" depends="load-properties" unless="phpant.data.common.init.done">
 		<property name="phpant.config.common.vendor.dir" value="${basedir}/vendor/bin" relative="true"/>
 		<property name="phpant.config.common.src.dir" value="${basedir}/src" relative="true"/>
 		<property name="phpant.config.common.project.name" value="${ant.project.name}"/>
-		
 		<property name="phpant.config.common.colors" value="false"/>
+
+		<property name="phpant.config.common.build.dir" value="${basedir}/build/"/>
+		<property name="phpant.config.common.work.dir" value="${phpant.config.common.build.dir}/workdir/"/>
+		<property name="phpant.config.common.results.dir" value="${phpant.config.common.build.dir}/results/"/>
+
+		<property name="phpant.data.common.init.done" value="true"/>
 	</target>
 
 	<!-- Dump config to log and file -->

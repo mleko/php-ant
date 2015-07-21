@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="analyze" basedir="." default="run">
+	<!-- 
+	============
+	 PROPERTIES
+	============
+	-->
+	<!-- Init default properties -->
+	<dirname property="phpant.data.include.basedir" file="${ant.file.test}"/>
+	<include file="${phpant.data.include.basedir}/common.xml"/>
+	<target name="init" depends="common.init">
+		<property name="phpant.config.analyze.bin.dir" value="${phpant.config.common.vendor.dir}" relative="true"/>
+		<property name="phpant.config.analyze.src.dir" value="${phpant.config.common.src.dir}" relative="true"/>
+		<property name="phpant.config.analyze.output.dir" value="${phpant.config.common.results.dir}/analyze" relative="true"/>
+		<property name="phpant.config.analyze.phpdox.project" value="${phpant.config.common.project.name}"/>
+		
+		<property name="phpant.config.analyze.phpmetrics.bin" value="${phpant.config.analyze.bin.dir}/phpmetrics" relative="true"/>
+		
+		<property name="phpant.config.analyze.phpmd.bin" value="${phpant.config.analyze.bin.dir}/phpmd" relative="true"/>
+		<property name="phpant.config.analyze.phpcd.rulesets" value="cleancode,codesize,controversial,design,naming,unusedcode"/>
+		
+		<property name="phpant.config.analyze.phpcpd.bin" value="${phpant.config.analyze.bin.dir}/phpcpd" relative="true"/>
+		<property name="phpant.config.analyze.phploc.bin" value="${phpant.config.analyze.bin.dir}/phploc" relative="true"/>
+        
+		<property name="phpant.config.analyze.phpcs.bin" value="${phpant.config.analyze.bin.dir}/phpcs" relative="true"/>
+		<property name="phpant.config.analyze.phpcs.standard" value="PSR1,PSR2"/>
+        
+		<property name="phpant.config.analyze.pdepend.bin" value="${phpant.config.analyze.bin.dir}/pdepend" relative="true"/>
+	</target>
+
+	<!-- 
+	============
+	 TARGETS
+	============
+	-->
+	<target name="run" description="Run quality checks" depends="analyze"/>
+	
+	<target name="analyze" depends="phpmetrics, phpmd, phpcpd, phploc, phpcs"/>
+	
+	<target name="help">
+		<echo>Supported libraries:</echo>
+		<echo>halleck45/phpmetrics</echo>
+		<echo>phpmd/phpmd</echo>
+		<echo>sebastian/phpcpd</echo>
+		<echo>phploc/phploc</echo>
+		<echo>squizlabs/php_codesniffer</echo>
+	</target>
+	
+	<!-- == Analyzers == -->
+	
+	<!-- PHPMetrics https://github.com/Halleck45/PhpMetrics -->
+	<target name="phpmetrics-exists" depends="init">
+		<condition property="phpant.data.analyze.phpmetrics.exists" value="true">
+			<available file="${phpant.config.analyze.phpmetrics.bin}"/>
+		</condition>
+	</target>
+	<target name="phpmetrics" if="phpant.data.analyze.phpmetrics.exists" depends="phpmetrics-exists">
+		<exec executable="${phpant.config.analyze.phpmetrics.bin}">
+			<arg value="-q" />
+			<arg line="--report-xml='${phpant.config.analyze.output.dir}/phpmetrics/phpmetrics.xml'" />
+			<arg line="--report-html='${phpant.config.analyze.output.dir}/phpmetrics/phpmetrics.html'" />
+			<arg line="--report-csv='${phpant.config.analyze.output.dir}/phpmetrics/phpmetrics.csv'" />
+			<arg line="--violations-xml='${phpant.config.analyze.output.dir}/phpmetrics/violations.xml'" />
+			
+			<arg value="${phpant.config.analyze.src.dir}"/>
+		</exec>
+	</target>
+	
+	<!-- PHPMessDetector http://phpmd.org/ -->
+	<target name="phpmd-exists" depends="init">
+		<condition property="phpant.data.analyze.phpmd.exists" value="true">
+			<available file="${phpant.config.analyze.phpmd.bin}"/>
+		</condition>
+	</target>
+	<target name="phpmd" if="phpant.data.analyze.phpmd.exists" depends="phpmd-exists">
+		<mkdir dir="${phpant.config.analyze.output.dir}/phpmd"/>
+		
+		<exec executable="${phpant.config.analyze.phpmd.bin}">
+			<arg value="${phpant.config.analyze.src.dir}"/>
+			<arg value="xml" />
+			<arg line="${phpant.config.analyze.phpcd.rulesets}" />
+			<arg line="--reportfile ${phpant.config.analyze.output.dir}/phpmd/phpmd.xml" />
+		</exec>
+		<echo>Result code 2 for PHPMD means it detected rule violations. Don't panic</echo>
+	</target>
+	
+	<!-- PHP Copy/Paste Detector https://github.com/sebastianbergmann/phpcpd -->
+	<target name="phpcpd-exists" depends="init">
+		<condition property="phpant.data.analyze.phpcpd.exists" value="true">
+			<available file="${phpant.config.analyze.phpcpd.bin}"/>
+		</condition>
+	</target>
+	<target name="phpcpd" if="phpant.data.analyze.phpcpd.exists" depends="phpcpd-exists">
+		<mkdir dir="${phpant.config.analyze.output.dir}/phpcpd"/>
+		<exec executable="${phpant.config.analyze.phpcpd.bin}">
+			<arg line="--log-pmd ${phpant.config.analyze.output.dir}/phpcpd/phpcpd.xml" />
+
+			<arg value="${phpant.config.analyze.src.dir}"/>
+		</exec>
+	</target>
+
+	<!-- PHPLOC https://github.com/sebastianbergmann/phploc -->
+	<target name="phploc-exists" depends="init">
+		<condition property="phpant.data.analyze.phpcpd.exists" value="true">
+			<available file="${phpant.config.analyze.phploc.bin}"/>
+		</condition>
+	</target>
+	<target name="phploc" if="phpant.data.analyze.phploc.exists" depends="phploc-exists">
+		<mkdir dir="${phpant.config.analyze.output.dir}/phploc"/>
+		<exec executable="${phpant.config.analyze.phploc.bin}">
+			<arg line="--log-csv ${phpant.config.analyze.output.dir}/phploc/phploc.csv" />
+			<arg line="--log-xml ${phpant.config.analyze.output.dir}/phploc/phploc.xml" />
+
+			<arg value="${phpant.config.analyze.src.dir}"/>
+		</exec>
+	</target>
+
+	<!-- PHP_CodeSniffer https://github.com/squizlabs/PHP_CodeSniffer -->
+	<target name="phpcs-exists" depends="init">
+		<condition property="phpant.data.analyze.phpcs.exists" value="true">
+			<available file="${phpant.config.analyze.phpcs.bin}"/>
+		</condition>
+	</target>
+	<target name="phpcs" if="phpant.data.analyze.phpcs.exists" depends="phpcs-exists">
+		<mkdir dir="${phpant.config.analyze.output.dir}/phpcs"/>
+		<exec executable="${phpant.config.analyze.phpcs.bin}">
+			<arg line="-n"/>
+			<arg line="--ignore='*/bower_components/*'"/>
+			<arg line="--standard=${phpant.config.analyze.phpcs.standard}"/>
+			<arg line="--report-full=${phpant.config.analyze.output.dir}/phpcs/phpcs.full" />
+			<arg line="--report-xml=${phpant.config.analyze.output.dir}/phpcs/phpcs.xml" />
+			<arg line="--report-checkstyle=${phpant.config.analyze.output.dir}/phpcs/phpcs.checkstyle.xml" />
+			<arg line="--report-csv=${phpant.config.analyze.output.dir}/phpcs/phpcs.csv" />
+			<arg line="--report-json=${phpant.config.analyze.output.dir}/phpcs/phpcs.json" />
+			<arg line="--report-summary=${phpant.config.analyze.output.dir}/phpcs/phpcs.summary" />
+
+			<arg value="${phpant.config.analyze.src.dir}"/>
+		</exec>
+		<echo>Result code 1 for PHPCS means it detected rule violations. Don't panic</echo>
+	</target>
+
+</project>

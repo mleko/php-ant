@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="composer" default="update" xmlns:phpant.composer="composer.phpant.mleko">
 
-	<property name="phpant.properties" value="${basedir}/phpant.properties"/>
 
-	<!-- Load properties from file -->
-	<condition property="composer.properties.available" value="true">
-		<available file="${phpant.properties}"/>
-	</condition>
-	<target name="load-properties" if="composer.properties.available">
-		<echo level="verbose">Load properties from file ${phpant.properties}</echo>
-		<property file="${phpant.properties}" relative="true"/>
-	</target>
-
-	<!-- Init default properties -->
-	<target name="init" depends="load-properties">
+	<!-- Read properties and init default values -->
+	<dirname property="phpant.data.include.basedir" file="${ant.file.phpant}"/>
+	<include file="${phpant.data.include.basedir}/common.xml"/>
+	<target name="init" depends="common.init">
 		<property name="phpant.config.composer.self-update" value="true"/>
 		<property name="phpant.config.composer.self-update.age" value="604800"/>
 
@@ -28,21 +20,10 @@
 	</target>
 
 	<!-- Check composer age -->
-	<target name="check-age" depends="init, check-age-script, check-age-tstamp" if="phpant.config.composer.self-update.age">
+	<target name="check-age" depends="init, check-age-tstamp" if="phpant.config.composer.self-update.age">
 
 	</target>
-	<target name="check-javax-script">
-		<condition property="phpant.data.quality.javax-script.available">
-			<and>
-				<contains string="${java.runtime.name}" substring="Java(TM)"/>
-				<antversion atleast="1.6"/>
-			</and>
-		</condition>
-	</target>
-	<target name="check-age-script" depends="init, check-javax-script" if="phpant.data.quality.javax-script.available">
-		<phpant.composer:isNewerThan file="${phpant.config.composer.phar}" age="${phpant.config.composer.self-update.age}" property="composer.phar.upToDate"/>
-	</target>
-	<target name="check-age-tstamp" depends="init, check-javax-script" unless="phpant.data.quality.javax-script.available">
+	<target name="check-age-tstamp" depends="init">
 		<local name="date"/>
 		<local name="tempfile"/>
 		<tstamp>
@@ -102,43 +83,4 @@
 			<echo message="composer @{command} ended" level="verbose"/>
 		</sequential>
 	</macrodef>
-
-	<!-- Check if specified file is newer than age in seconds -->
-	<scriptdef name="isNewerThan" uri="composer.phpant.mleko" language="javascript">
-		<!-- The file to check. -->
-		<attribute name="file"/>
-		<!-- The threshold of file age in seconds. -->
-		<attribute name="age"/>
-		<!-- The name of property to set. -->
-		<attribute name="property"/>
-		<!-- The value to set the property to. Defaults to "true". -->
-		<attribute name="value"/>
-		<!-- The value to set the property to if the condition evaluates to false. By default the property will remain unset. -->
-		<attribute name="else"/>
-
-		<![CDATA[
-			var fileName = attributes.get("file");
-			var age = attributes.get("age");
-			var property = attributes.get("property");
-			var value = attributes.get("value");
-			var elseValue = attributes.get("else");
-			
-			var maxAge = parseInt(age, 10);
-			
-			if(null === fileName)self.fail("`file` is required");
-			if(null === age || isNaN(maxAge))self.fail("`age` is required and must be valid int string");
-			if(null === property)self.fail("`property` is required");
-			if(null === value)value="true";
-				
-			var file = new java.io.File(fileName);
-			var ageInSeconds = (Date.now() - file.lastModified())/1000;
-			
-			if(ageInSeconds < maxAge){
-				project.setProperty(property, value);
-			}else if(null !== elseValue){
-				project.setProperty(property, elseValue);
-			}
-		]]>
-	</scriptdef>
-
 </project>

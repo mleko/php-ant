@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="phpant">
+	<dirname property="phpant.data.include.basedir" file="${ant.file.phpant}"/>
+	
+	<include file="${phpant.data.include.basedir}/common.xml"/>
+	<include file="${phpant.data.include.basedir}/composer.xml"/>
+	<include file="${phpant.data.include.basedir}/validate.xml"/>
+	<include file="${phpant.data.include.basedir}/analyze.xml"/>
+	<include file="${phpant.data.include.basedir}/test.xml"/>
+</project>

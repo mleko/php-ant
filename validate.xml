@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="validate" >
+
+	<target name="run" depends="php-lint"/>
+
+	<dirname property="phpant.data.include.basedir" file="${ant.file.phpant}"/>
+	<include file="${phpant.data.include.basedir}/common.xml"/>
+	<target name="init" depends="common.init">
+
+	</target>
+
+	<target name="php-lint" depends="init">
+		<apply executable="/usr/bin/env" failonerror="true">
+			<arg line="php"/>
+			<arg line="-l"/>
+			<fileset dir="${phpant.config.common.src.dir}">
+				<include name="**/*.php" />
+				<modified />
+			</fileset>
+		</apply>
+	</target>
+</project>

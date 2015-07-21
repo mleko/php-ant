@@ -6,65 +6,135 @@
 	============
 	-->
 
-	<dirname property="include.basedir" file="${ant.file.quality}"/>
-	<include file="${include.basedir}/common.xml"/>
-
 	<!-- Init default properties -->
+	<dirname property="phpant.data.include.basedir" file="${ant.file.test}"/>
+	<include file="${phpant.data.include.basedir}/common.xml"/>
 	<target name="init" depends="common.init">
 		<property name="phpant.config.test.bin.dir" value="${basedir}/vendor/bin" relative="true"/>
 		<property name="phpant.config.test.output.dir" value="${basedir}/build/test" relative="true"/>
 		<property name="phpant.config.test.codecoverage" value="true"/>
 
+		<property name="phpant.config.test.phpunit.bin" value="${phpant.config.test.bin.dir}/phpunit" relative="true"/>
+		<property name="phpant.config.test.phpunit.output.dir" value="${basedir}/${phpant.config.test.output.dir}/phpunit"/>
+		<property name="phpant.config.test.phpunit.codecoverage" value="${phpant.config.test.codecoverage}"/>
+		<property name="phpant.config.test.phpunit.config.file" value="${basedir}/phpunit.xml"/>
+
 		<property name="phpant.config.test.codeception.bin" value="${phpant.config.test.bin.dir}/codecept" relative="true"/>
 		<property name="phpant.config.test.codeception.output.dir" value="${basedir}/${phpant.config.test.output.dir}/codeception"/>
 		<property name="phpant.config.test.codeception.codecoverage" value="${phpant.config.test.codecoverage}"/>
+		<property name="phpant.config.test.codeception.config.dir" value="${basedir}"/>
 	</target>
-
-	<!-- Dump config to log and file -->
-	<target name="dump-properties" depends="init, common.dump-properties" description="Init properties and dump them to file"/>
 
 	<!-- 
 	============
 	 TARGETS
 	============
 	-->
-	<target name="unit" description="Perform unit tests" depends="codeception-unit"/>
+	<target name="unit" description="Perform unit tests" depends="phpunit-unit, codeception-unit"/>
+
+	<target name="integration" depends="codeception-integration"/>
 
 	<target name="help">
 		<echo>Supported libraries:</echo>
+		<echo>phpunit/phpunit</echo>
 		<echo>codeception/codeception</echo>
 	</target>
 
 	<!-- == Tests == -->
+	<!-- phpunit -->
+	<target name="phpunit-exists" depends="init">
+		<condition property="phpant.data.test.phpunit.exists" value="true">
+			<available file="${phpant.config.test.phpunit.bin}"/>
+		</condition>
+	</target>
 
+	<target name="phpunit-unit" depends="phpunit-exists" if="phpant.data.test.phpunit.exists">
+		<mkdir dir="${phpant.config.test.phpunit.output.dir}"/>
+
+		<local name="coverageArgument"/>
+
+		<condition property="coverageArgument"
+		           value="--coverage-xml ${phpant.config.test.phpunit.output.dir}/coverage.xml
+		           --coverage-html ${phpant.config.test.phpunit.output.dir}/coverage
+		           --coverage-clover ${phpant.config.test.phpunit.output.dir}/coverage.clover.xml"
+		           else="">
+			<istrue value="${phpant.config.test.phpunit.codecoverage}"/>
+		</condition>
+
+		<exec executable="${phpant.config.test.phpunit.bin}" failonerror="true">
+			<arg line="-c ${phpant.config.test.phpunit.config.file}"/>
+			<arg line="--log-junit ${phpant.config.test.phpunit.output.dir}/unit.xml"/>
+		</exec>
+	</target>
 
 	<!-- codeception -->
 	<target name="codeception-exists" depends="init">
 		<condition property="phpant.data.test.codeception.exists" value="true">
 			<available file="${phpant.config.test.codeception.bin}"/>
 		</condition>
+		<condition property="phpant.data.test.codeception.run-unit" value="true">
+			<and>
+				<istrue value="${phpant.data.test.codeception.exists}"/>
+				<available file="${phpant.config.test.codeception.config.dir}/tests/unit.suite.yml"/>
+			</and>
+		</condition>
+		<condition property="phpant.data.test.codeception.run-integration" value="true">
+			<and>
+				<istrue value="${phpant.data.test.codeception.exists}"/>
+				<available file="${phpant.config.test.codeception.config.dir}/tests/integration.suite.yml"/>
+			</and>
+		</condition>
 	</target>
-	
-	<target name="codeception-unit" if="phpant.data.test.codeception.exists" depends="codeception-exists">
+
+	<target name="codeception-unit" if="phpant.data.test.codeception.run-unit" depends="codeception-exists">
 		<mkdir dir="${phpant.config.test.codeception.output.dir}"/>
-		
+
 		<local name="coverageArgument"/>
 		<local name="colors"/>
 		<local name="command"/>
-		
+
 		<condition property="coverageArgument"
-				value="--coverage-xml ${phpant.config.test.codeception.output.dir}/coverage.xml --coverage-html ${phpant.config.test.codeception.output.dir}/coverage"
-				else="">
+		           value="--coverage-xml ${phpant.config.test.codeception.output.dir}/unit.coverage.xml --coverage-html ${phpant.config.test.codeception.output.dir}/unit.coverage"
+		           else="">
 			<istrue value="${phpant.config.test.codeception.codecoverage}"/>
 		</condition>
 		<condition property="colors" value="--colors" else="--no-colors">
 			<istrue value="${phpant.config.common.colors}"/>
 		</condition>
 		<property name="command" value="${colors} ${coverageArgument} unit"/>
-		<exec executable="${phpant.config.test.codeception.bin}">
+		<exec executable="${phpant.config.test.codeception.bin}" failonerror="true">
 			<arg line="run"/>
+			<arg line="-c ${phpant.config.test.codeception.config.dir}"/>
 			<arg line="--xml ${phpant.config.test.codeception.output.dir}/unit.xml"/>
 			<arg line="--html ${phpant.config.test.codeception.output.dir}/unit.html"/>
+			<arg line="--steps"/>
+			<arg line="--no-interaction"/>
+			<arg line="${command}"/>
+		</exec>
+	</target>
+
+	<target name="codeception-integration" if="phpant.data.test.codeception.run-integration" depends="codeception-exists">
+		<mkdir dir="${phpant.config.test.codeception.output.dir}"/>
+
+		<local name="coverageArgument"/>
+		<local name="colors"/>
+		<local name="command"/>
+
+		<condition property="coverageArgument"
+		           value="--coverage-xml ${phpant.config.test.codeception.output.dir}/integration.coverage.xml --coverage-html ${phpant.config.test.codeception.output.dir}/integration.coverage"
+		           else="">
+			<istrue value="${phpant.config.test.codeception.codecoverage}"/>
+		</condition>
+		<condition property="colors" value="--colors" else="--no-colors">
+			<istrue value="${phpant.config.common.colors}"/>
+		</condition>
+		<property name="command" value="${colors} ${coverageArgument} integration"/>
+		<exec executable="${phpant.config.test.codeception.bin}" failonerror="true">
+			<arg line="run"/>
+			<arg line="-c ${phpant.config.test.codeception.config.dir}"/>
+			<arg line="--xml ${phpant.config.test.codeception.output.dir}/integration.xml"/>
+			<arg line="--html ${phpant.config.test.codeception.output.dir}/integration.html"/>
+			<arg line="--no-interaction"/>
 			<arg line="${command}"/>
 		</exec>
 	</target>

@@ -6,6 +6,9 @@
 			<arg line="php"/>
 			<arg line="${phpant.config.composer.phar}"/>
 			<arg line="--no-interaction"/>
+			<arg line="--no-progress"/>
+			<arg line="--dev"/>
+			<arg line="--quiet"/>
 			<arg line="install"/>
 		</exec>
 	</target>
