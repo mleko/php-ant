@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="composer-mini" default="install">
+	<property name="phpant.config.composer.phar" location="${basedir}/build/workdir/tools/composer.phar" relative="true"/>
+	<target name="install" depends="self-install">
+		<exec executable="/usr/bin/env">
+			<arg line="php"/>
+			<arg line="${phpant.config.composer.phar}"/>
+			<arg line="--no-interaction"/>
+			<arg line="install"/>
+		</exec>
+	</target>
+	<target name="self-install">
+		<local name="composer.phar.dir"/>
+		<dirname property="composer.phar.dir" file="${phpant.config.composer.phar}"/>
+		<mkdir dir="${composer.phar.dir}"/>
+
+		<get src="https://getcomposer.org/composer.phar" dest="${phpant.config.composer.phar}" skipexisting="true"/>
+		<chmod file="${phpant.config.composer.phar}" perm="0755"/>
+	</target>
+</project>
