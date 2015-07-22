@@ -23,7 +23,7 @@
 	-->
 	<target name="run" description="Build reports" depends="report"/>
 	
-	<target name="analyze" depends="phpcb"/>
+	<target name="report" depends="phpcb"/>
 	
 	<target name="help">
 		<echo>Supported libraries:</echo>
