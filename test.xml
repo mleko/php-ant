@@ -11,7 +11,7 @@
 	<include file="${phpant.data.include.basedir}/common.xml"/>
 	<target name="init" depends="common.init">
 		<property name="phpant.config.test.bin.dir" value="${basedir}/vendor/bin" relative="true"/>
-		<property name="phpant.config.test.output.dir" value="${basedir}/build/test" relative="true"/>
+		<property name="phpant.config.test.output.dir" value="${phpant.config.common.results.dir}/test" relative="true"/>
 		<property name="phpant.config.test.codecoverage" value="true"/>
 
 		<property name="phpant.config.test.phpunit.bin" value="${phpant.config.test.bin.dir}/phpunit" relative="true"/>
