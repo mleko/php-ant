@@ -42,7 +42,7 @@
 		<exec executable="${phpant.config.report.phpcb.bin}">
 			<arg line="--output '${phpant.config.report.output.dir}/phpcb/'" />
 			<arg line="--log '${phpant.config.common.results.dir}/'" />
-			<arg line="--src '${phpant.config.report.src.dir}'" />
+			<arg line="--source '${phpant.config.report.src.dir}'" />
 			
 			<arg value="${phpant.config.analyze.src.dir}"/>
 		</exec>
