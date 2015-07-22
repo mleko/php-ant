@@ -7,4 +7,5 @@
 	<include file="${phpant.data.include.basedir}/validate.xml"/>
 	<include file="${phpant.data.include.basedir}/analyze.xml"/>
 	<include file="${phpant.data.include.basedir}/test.xml"/>
+	<include file="${phpant.data.include.basedir}/report.xml"/>
 </project>

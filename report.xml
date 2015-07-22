@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="report" basedir="." default="run">
+	<!-- 
+	============
+	 PROPERTIES
+	============
+	-->
+	<!-- Init default properties -->
+	<dirname property="phpant.data.include.basedir" file="${ant.file.test}"/>
+	<include file="${phpant.data.include.basedir}/common.xml"/>
+	<target name="init" depends="common.init">
+		<property name="phpant.config.report.bin.dir" value="${phpant.config.common.vendor.dir}" relative="true"/>
+		<property name="phpant.config.report.src.dir" value="${phpant.config.common.src.dir}" relative="true"/>
+		<property name="phpant.config.report.output.dir" value="${phpant.config.common.results.dir}/analyze" relative="true"/>
+		
+		<property name="phpant.config.report.phpcb.bin" value="${phpant.config.analyze.bin.dir}/phpcb" relative="true"/>
+	</target>
+
+	<!-- 
+	============
+	 TARGETS
+	============
+	-->
+	<target name="run" description="Build reports" depends="report"/>
+	
+	<target name="analyze" depends="phpcb"/>
+	
+	<target name="help">
+		<echo>Supported libraries:</echo>
+		<echo>mayflower/php-codebrowser</echo>
+	</target>
+	
+	<!-- == Analyzers == -->
+	
+	<!-- PHP_CodeBrowser https://github.com/Mayflower/PHP_CodeBrowser -->
+	<target name="phpcb-exists" depends="init">
+		<condition property="phpant.data.report.phpcb.exists" value="true">
+			<available file="${phpant.config.report.phpcb.bin}"/>
+		</condition>
+	</target>
+	<target name="phpcb" if="phpant.data.report.phpcb.exists" depends="phpcb-exists">
+		<exec executable="${phpant.config.report.phpcb.bin}">
+			<arg line="--output '${phpant.config.report.output.dir}/phpcb/'" />
+			<arg line="--log '${phpant.config.common.results.dir}/'" />
+			<arg line="--src '${phpant.config.report.src.dir}'" />
+			
+			<arg value="${phpant.config.analyze.src.dir}"/>
+		</exec>
+	</target>
+
+</project>
